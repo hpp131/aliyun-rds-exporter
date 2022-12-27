@@ -54,3 +54,9 @@ func (D *AllData) MetricData(MetricsName []string) {
 	}
 
 }
+
+//func (d *AllData) Describe(ch <-chan *prometheus.Desc) {
+//	for _, value := range d.DataPoint {
+//		value["MetircName"] :
+//	}
+//}
