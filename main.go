@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
 )
 
 const (
@@ -17,22 +19,28 @@ type AllData struct {
 }
 
 type Metrics struct {
-	Metrics []*prometheus.Desc
+	Metrics   []*prometheus.Desc
+	DataPoint []map[string]interface{}
 }
 
 func main() {
-	dp := AllData{}
+	dp := Metrics{}
 	//point := &dp
 	dp.MetricData(MetricsName)
+	//dp.NewMetirc()
+	registry := prometheus.NewRegistry()
+	registry.Register(dp.NewMetirc())
+	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
+	http.ListenAndServe(":9999", nil)
 	fmt.Println(dp.DataPoint)
 
 }
 
-func (dp *AllData) NewMetirc() *Metrics {
+func (m *Metrics) NewMetirc() prometheus.Collector {
 	var desc = []*prometheus.Desc{}
 	//var variablelabel=  []string{"instanceID"}
 	var constantlabel = map[string]string{"instanceid": "rm-uf64if27mi7e9p63l"}
-	for _, value := range dp.DataPoint {
+	for _, value := range m.DataPoint {
 		name := fmt.Sprintf("%s", value["MetircName"])
 		desc = append(desc, prometheus.NewDesc(name, "help", nil, constantlabel))
 	}
@@ -41,15 +49,16 @@ func (dp *AllData) NewMetirc() *Metrics {
 	}
 }
 
-func (m *Metrics) Describe(ch <-chan *prometheus.Desc) {
+func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 	for _, metric := range m.Metrics {
 		ch <- metric
 	}
 }
 
-func (m *Metrics) Collect(ch <-chan prometheus.Metric, dp *AllData) {
+func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	for index, metric := range m.Metrics {
-		ch <- prometheus.MustNewConstMetric(metric, prometheus.GaugeValue, dp.DataPoint[index][], nil)
+		value := m.DataPoint[index]["Average"].(float64)
+		ch <- prometheus.MustNewConstMetric(metric, prometheus.GaugeValue, value)
 
 	}
 }

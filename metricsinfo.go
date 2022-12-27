@@ -18,11 +18,10 @@ func GetInstance() []string {
 }
 */
 
-func (D *AllData) MetricData(MetricsName []string) {
+func (m *Metrics) MetricData(MetricsName []string) {
 	endTime := time.Now().UTC().Format(time.RFC3339)
 	startTime := time.Now().UTC().Add(-5 * time.Minute).Format(time.RFC3339)
 	config := sdk.NewConfig()
-
 	credential := credentials.NewAccessKeyCredential(AccessKey, SecretKey)
 	client, err := cms.NewClientWithOptions("cn-hangzhou", config, credential)
 	if err != nil {
@@ -38,8 +37,6 @@ func (D *AllData) MetricData(MetricsName []string) {
 	request.EndTime = endTime
 	for _, metric := range MetricsName {
 		var datapoint = []map[string]interface{}{}
-
-		//fmt.Println(metric)
 		request.MetricName = metric
 		response, err := client.DescribeMetricList(request)
 		if err != nil {
@@ -50,7 +47,7 @@ func (D *AllData) MetricData(MetricsName []string) {
 			fmt.Println(err)
 		}
 		datapoint[2]["MetircName"] = metric
-		D.DataPoint = append(D.DataPoint, datapoint[2])
+		m.DataPoint = append(m.DataPoint, datapoint[2])
 	}
 
 }
