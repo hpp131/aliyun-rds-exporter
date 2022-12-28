@@ -27,26 +27,25 @@ func main() {
 	dp := Metrics{}
 	//point := &dp
 	dp.MetricData(MetricsName)
-	//dp.NewMetirc()
+	//fmt.Println(dp.DataPoint)
 	registry := prometheus.NewRegistry()
 	registry.Register(dp.NewMetirc())
+	fmt.Println("the dp.Metrics data is ,", dp.Metrics)
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
 	http.ListenAndServe(":9999", nil)
-	fmt.Println(dp.DataPoint)
-
 }
 
 func (m *Metrics) NewMetirc() prometheus.Collector {
-	var desc = []*prometheus.Desc{}
+	var desc []*prometheus.Desc
 	//var variablelabel=  []string{"instanceID"}
 	var constantlabel = map[string]string{"instanceid": "rm-uf64if27mi7e9p63l"}
 	for _, value := range m.DataPoint {
 		name := fmt.Sprintf("%s", value["MetircName"])
 		desc = append(desc, prometheus.NewDesc(name, "help", nil, constantlabel))
 	}
-	return &Metrics{
-		Metrics: desc,
-	}
+	m.Metrics = desc
+	fmt.Println("the desc[] is", desc)
+	return m
 }
 
 func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
