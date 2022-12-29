@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 
@@ -52,4 +54,5 @@ func main() {
 	//new()
 	ming := new(structtest)
 	fmt.Println(ming)
+	testadd
 }
