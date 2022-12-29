@@ -5,6 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
+	"time"
 )
 
 const (
@@ -25,26 +26,39 @@ type Metrics struct {
 
 func main() {
 	dp := Metrics{}
-	//point := &dp
 	dp.MetricData(MetricsName)
-	//fmt.Println(dp.DataPoint)
+	go func() {
+		for {
+			time.Sleep(1 * time.Minute)
+			dp.MetricData(MetricsName)
+		}
+
+	}()
+
+	// 用于检验m.datapoint中的数据是否成功更新，debug使用。正常运行时注释此代码
+	//go func() {
+	//	for {
+	//		time.Sleep(30 * time.Second)
+	//		fmt.Println("listening datapoint goroutine.....")
+	//		fmt.Println(dp.DataPoint)
+	//	}
+	//}()
 	registry := prometheus.NewRegistry()
 	registry.Register(dp.NewMetirc())
-	fmt.Println("the dp.Metrics data is ,", dp.Metrics)
+	//fmt.Println("the dp.Metrics data is ,", dp.Metrics)
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{Registry: registry}))
 	http.ListenAndServe(":9999", nil)
 }
 
 func (m *Metrics) NewMetirc() prometheus.Collector {
 	var desc []*prometheus.Desc
-	//var variablelabel=  []string{"instanceID"}
 	var constantlabel = map[string]string{"instanceid": "rm-uf64if27mi7e9p63l"}
 	for _, value := range m.DataPoint {
 		name := fmt.Sprintf("%s", value["MetircName"])
 		desc = append(desc, prometheus.NewDesc(name, "help", nil, constantlabel))
 	}
 	m.Metrics = desc
-	fmt.Println("the desc[] is", desc)
+	//fmt.Println("the desc[] is", desc)
 	return m
 }
 
@@ -57,6 +71,7 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	for index, metric := range m.Metrics {
 		value := m.DataPoint[index]["Average"].(float64)
+		fmt.Println(value)
 		ch <- prometheus.MustNewConstMetric(metric, prometheus.GaugeValue, value)
 
 	}

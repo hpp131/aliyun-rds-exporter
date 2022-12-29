@@ -19,6 +19,8 @@ func GetInstance() []string {
 */
 
 func (m *Metrics) MetricData(MetricsName []string) {
+	// 每次刷新数据前将m.datapoint数据清空，否则新数据会被append到m.datapoint切片后
+	m.DataPoint = []map[string]interface{}{}
 	endTime := time.Now().UTC().Format(time.RFC3339)
 	startTime := time.Now().UTC().Add(-5 * time.Minute).Format(time.RFC3339)
 	config := sdk.NewConfig()

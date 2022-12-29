@@ -11,5 +11,4 @@ func main() {
 	//	//test = append(test, metric)
 	//}
 	fmt.Println(MetricsName[0])
-
 }
