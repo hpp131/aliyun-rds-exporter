@@ -27,12 +27,12 @@ type Metrics struct {
 func main() {
 	dp := Metrics{}
 	dp.MetricData(MetricsName)
+	// 使用goroutine更新m.datapoint数据
 	go func() {
 		for {
 			time.Sleep(1 * time.Minute)
 			dp.MetricData(MetricsName)
 		}
-
 	}()
 
 	// 用于检验m.datapoint中的数据是否成功更新，debug使用。正常运行时注释此代码
@@ -71,7 +71,6 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	for index, metric := range m.Metrics {
 		value := m.DataPoint[index]["Average"].(float64)
-		fmt.Println(value)
 		ch <- prometheus.MustNewConstMetric(metric, prometheus.GaugeValue, value)
 
 	}
