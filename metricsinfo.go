@@ -9,15 +9,6 @@ import (
 	"time"
 )
 
-/*
-get rds instance in current aliyun account
-
-func GetInstance() []string {
-	var instances = []string{"xxxx", "xxxxx"}
-	return instances
-}
-*/
-
 func (m *Metrics) MetricData(MetricsName []string) {
 	// 每次刷新数据前将m.datapoint数据清空，否则新数据会被append到m.datapoint切片后
 	m.DataPoint = []map[string]interface{}{}
@@ -53,9 +44,3 @@ func (m *Metrics) MetricData(MetricsName []string) {
 	}
 
 }
-
-//func (d *AllData) Describe(ch <-chan *prometheus.Desc) {
-//	for _, value := range d.DataPoint {
-//		value["MetircName"] :
-//	}
-//}

@@ -15,10 +15,6 @@ const (
 
 var MetricsName = []string{"ConnectionUsage", "CpuUsage", "DiskUsage", "IOPSUsage", "MemoryUsage", "MySQL_ActiveSessions"}
 
-type AllData struct {
-	DataPoint []map[string]interface{}
-}
-
 type Metrics struct {
 	Metrics   []*prometheus.Desc
 	DataPoint []map[string]interface{}
