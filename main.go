@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-const (
-	AccessKey = "LTAI5tPwoRHDHjZDCY85QPN8"
-	SecretKey = "WBEOSMwaqljhBQlqoi5WfTFqVe45wg"
-)
+//const (
+//	AccessKey = "LTAI5tPwoRHDHjZDCY85QPN8"
+//	SecretKey = "WBEOSMwaqljhBQlqoi5WfTFqVe45wg"
+//)
 
 var MetricsName = []string{"ConnectionUsage", "CpuUsage", "DiskUsage", "IOPSUsage", "MemoryUsage", "MySQL_ActiveSessions"}
 
@@ -20,8 +20,9 @@ type Metrics struct {
 	DataPoint []map[string]interface{}
 }
 
+var configfile ConfigFile
+
 func main() {
-	var configfile ConfigFile
 	configfile.ConfigRead("config.json")
 	dp := Metrics{}
 	dp.MetricData(configfile.Instance_id)
@@ -29,7 +30,7 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(90 * time.Second)
-			dp.MetricData(MetricsName)
+			dp.MetricData(configfile.Instance_id)
 		}
 	}()
 
@@ -50,10 +51,10 @@ func main() {
 
 func (m *Metrics) NewMetirc() prometheus.Collector {
 	var desc []*prometheus.Desc
-	var constantlabel = map[string]string{"instanceid": "rm-uf64if27mi7e9p63l"}
 	for _, value := range m.DataPoint {
-		name := fmt.Sprintf("%s", value["MetircName"])
-		desc = append(desc, prometheus.NewDesc(name, "help", nil, constantlabel))
+		name := fmt.Sprintf("%s", value["metrics_name"])
+		id := fmt.Sprintf("%s", value["instanceId"])
+		desc = append(desc, prometheus.NewDesc(name, "help", nil, prometheus.Labels{"instance": id, "metrics_name": name}))
 	}
 	m.Metrics = desc
 	//fmt.Println("the desc[] is", desc)

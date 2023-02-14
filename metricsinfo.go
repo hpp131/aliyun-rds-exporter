@@ -23,7 +23,7 @@ func (m *Metrics) MetricData(instanceid []string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	AliYunApiRequest(string(demension), m.DataPoint)
+	configfile.AliYunApiRequest(string(demension), m.DataPoint)
 
 }
 
@@ -44,9 +44,9 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 	request.StartTime = startTime
 	request.EndTime = endTime
 	request.Dimensions = demensions
+	var wg sync.WaitGroup
+	var mt sync.Mutex
 	for _, metric := range MetricsName {
-		var mt sync.Mutex
-		var wg sync.WaitGroup
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -60,11 +60,15 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 			if err != nil {
 				fmt.Println(err)
 			}
+			//对返回的response中的map元素手动添加metricsname字段
+			for _, value := range datapoint {
+				value["metrics_name"] = metric
+			}
 			mt.Lock()
 			dp = append(dp, datapoint...)
 			mt.Unlock()
 		}()
-		wg.Wait()
 
 	}
+	wg.Wait()
 }
