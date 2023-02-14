@@ -21,12 +21,14 @@ type Metrics struct {
 }
 
 func main() {
+	var configfile ConfigFile
+	configfile.ConfigRead("config.json")
 	dp := Metrics{}
-	dp.MetricData(MetricsName)
+	dp.MetricData(configfile.Instance_id)
 	// 使用goroutine更新m.datapoint数据
 	go func() {
 		for {
-			time.Sleep(1 * time.Minute)
+			time.Sleep(90 * time.Second)
 			dp.MetricData(MetricsName)
 		}
 	}()

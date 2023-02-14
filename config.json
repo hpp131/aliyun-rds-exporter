@@ -1,0 +1,9 @@
+{
+  "accesskey": "aaaa",
+  "secretkey": "ssss",
+  "region": "rrrr",
+  "instance_id": [
+    "iiii1",
+    "iiii2"
+  ]
+}
