@@ -60,7 +60,7 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 			if err != nil {
 				fmt.Println(err)
 			}
-			//对返回的response中的map元素手动添加metricsname字段
+			//对返回的response中的map元素手动添加metrics_name字段
 			for _, value := range datapoint {
 				value["metrics_name"] = metric
 			}
