@@ -15,7 +15,7 @@ func (m *Metrics) MetricData(instanceid []string) {
 	m.DataPoint = []map[string]interface{}{}
 	var demensions []map[string]string
 	for _, value := range instanceid {
-		var element map[string]string
+		element := make(map[string]string)
 		element["instanceid"] = value
 		demensions = append(demensions, element)
 	}
@@ -32,7 +32,7 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 	startTime := time.Now().UTC().Add(-1 * time.Minute).Format(time.RFC3339)
 	config := sdk.NewConfig()
 	credential := credentials.NewAccessKeyCredential(c.Accesskey, c.Secretkey)
-	client, err := cms.NewClientWithOptions("cn-hangzhou", config, credential)
+	client, err := cms.NewClientWithOptions(configfile.Region, config, credential)
 	if err != nil {
 		panic(err)
 	}
@@ -62,11 +62,13 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 			}
 			//对返回的response中的map元素手动添加metrics_name字段
 			for _, value := range datapoint {
+				mt.Lock()
 				value["metrics_name"] = metric
+				mt.Unlock()
 			}
-			mt.Lock()
+			//mt.Lock()
 			dp = append(dp, datapoint...)
-			mt.Unlock()
+			//mt.Unlock()
 		}()
 
 	}
