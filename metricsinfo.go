@@ -47,10 +47,10 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 	var wg sync.WaitGroup
 	var mt sync.Mutex
 	for _, metric := range MetricsName {
+		var datapoint []map[string]interface{}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			var datapoint []map[string]interface{}
 			request.MetricName = metric
 			response, err := client.DescribeMetricList(request)
 			if err != nil {
