@@ -16,7 +16,7 @@ func (m *Metrics) MetricData(instanceid []string) {
 	var demensions []map[string]string
 	for _, value := range instanceid {
 		element := make(map[string]string)
-		element["instanceid"] = value
+		element["instanceId"] = value
 		demensions = append(demensions, element)
 	}
 	demension, err := json.Marshal(demensions)
