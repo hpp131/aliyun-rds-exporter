@@ -20,7 +20,6 @@ var configfile ConfigFile
 
 func main() {
 	configfile.ConfigRead("./config.json")
-	fmt.Println(configfile)
 	dp := Metrics{}
 	dp.MetricData(configfile.Instance_id)
 	// 使用goroutine更新m.datapoint数据

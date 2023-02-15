@@ -24,22 +24,26 @@ func (m *Metrics) MetricData(instanceid []string) {
 		fmt.Println(err)
 	}
 	var wg sync.WaitGroup
+	var mt sync.Mutex
+	wg.Add(len(MetricsName))
 	for _, metricsName := range MetricsName {
-		wg.Add(1)
+		metricsname := metricsName
 		go func() {
 			defer wg.Done()
-			configfile.AliYunApiRequest(string(demension), metricsName, m.DataPoint)
+			mt.Lock()
+			configfile.AliYunApiRequest(string(demension), metricsname, &m.DataPoint)
+			mt.Unlock()
 		}()
 	}
 	wg.Wait()
 }
 
-func (c *ConfigFile) AliYunApiRequest(demensions, metricsName string, dp []map[string]interface{}) {
+func (c *ConfigFile) AliYunApiRequest(demensions, metricsName string, dp *[]map[string]interface{}) {
 	endTime := time.Now().UTC().Format(time.RFC3339)
 	startTime := time.Now().UTC().Add(-1 * time.Minute).Format(time.RFC3339)
 	config := sdk.NewConfig()
 	credential := credentials.NewAccessKeyCredential(c.Accesskey, c.Secretkey)
-	client, err := cms.NewClientWithOptions(configfile.Region, config, credential)
+	client, err := cms.NewClientWithOptions(c.Region, config, credential)
 	if err != nil {
 		panic(err)
 	}
@@ -65,6 +69,6 @@ func (c *ConfigFile) AliYunApiRequest(demensions, metricsName string, dp []map[s
 	for _, value := range datapoint {
 		value["metrics_name"] = metricsName
 	}
-	dp = append(dp, datapoint...)
+	*dp = append(*dp, datapoint...)
 
 }
