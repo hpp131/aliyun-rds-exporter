@@ -23,11 +23,18 @@ func (m *Metrics) MetricData(instanceid []string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	configfile.AliYunApiRequest(string(demension), m.DataPoint)
-
+	var wg sync.WaitGroup
+	for _, metricsName := range MetricsName {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			configfile.AliYunApiRequest(string(demension), metricsName, m.DataPoint)
+		}()
+	}
+	wg.Wait()
 }
 
-func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interface{}) {
+func (c *ConfigFile) AliYunApiRequest(demensions, metricsName string, dp []map[string]interface{}) {
 	endTime := time.Now().UTC().Format(time.RFC3339)
 	startTime := time.Now().UTC().Add(-1 * time.Minute).Format(time.RFC3339)
 	config := sdk.NewConfig()
@@ -44,34 +51,20 @@ func (c *ConfigFile) AliYunApiRequest(demensions string, dp []map[string]interfa
 	request.StartTime = startTime
 	request.EndTime = endTime
 	request.Dimensions = demensions
-	var wg sync.WaitGroup
-	var mt sync.Mutex
-	for _, metric := range MetricsName {
-		metric := metric
-		var datapoint []map[string]interface{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			request.MetricName = metric
-			response, err := client.DescribeMetricList(request)
-			if err != nil {
-				fmt.Print(err.Error())
-			}
-			err = json.Unmarshal([]byte(response.Datapoints), &datapoint)
-			if err != nil {
-				fmt.Println(err)
-			}
-			//对返回的response中的map元素手动添加metrics_name字段
-			for _, value := range datapoint {
-				mt.Lock()
-				value["metrics_name"] = metric
-				mt.Unlock()
-			}
-			//mt.Lock()
-			dp = append(dp, datapoint...)
-			//mt.Unlock()
-		}()
-
+	request.MetricName = metricsName
+	var datapoint []map[string]interface{}
+	response, err := client.DescribeMetricList(request)
+	if err != nil {
+		fmt.Print(err.Error())
 	}
-	wg.Wait()
+	err = json.Unmarshal([]byte(response.Datapoints), &datapoint)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//对返回的response中的map元素手动添加metrics_name字段
+	for _, value := range datapoint {
+		value["metrics_name"] = metricsName
+	}
+	dp = append(dp, datapoint...)
+
 }
