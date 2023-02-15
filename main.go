@@ -8,11 +8,6 @@ import (
 	"time"
 )
 
-//const (
-//	AccessKey = "LTAI5tPwoRHDHjZDCY85QPN8"
-//	SecretKey = "WBEOSMwaqljhBQlqoi5WfTFqVe45wg"
-//)
-
 var MetricsName = []string{"ConnectionUsage", "CpuUsage", "DiskUsage", "IOPSUsage", "MemoryUsage", "MySQL_ActiveSessions"}
 
 type Metrics struct {
@@ -20,6 +15,7 @@ type Metrics struct {
 	DataPoint []map[string]interface{}
 }
 
+// define to global variabel
 var configfile ConfigFile
 
 func main() {
